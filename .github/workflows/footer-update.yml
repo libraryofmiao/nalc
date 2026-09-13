@@ -1,0 +1,76 @@
+name: Apply NALC footer update
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  update-footer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update only the four NALC footers
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          pages = {
+              "index.html": [
+                  ("Visits", "visit/index.html"),
+                  ("Testimonials", "visit/testimonials/index.html"),
+                  ("Founder", "visit/testimonials/founder/index.html"),
+                  ("Miao Library", "https://miaolibrary.in/"),
+              ],
+              "visit/index.html": [
+                  ("Home", "../index.html"),
+                  ("Testimonials", "testimonials/index.html"),
+                  ("Founder", "testimonials/founder/index.html"),
+                  ("Miao Library", "https://miaolibrary.in/"),
+              ],
+              "visit/testimonials/index.html": [
+                  ("Home", "../../index.html"),
+                  ("Visits", "../index.html"),
+                  ("Founder", "founder/index.html"),
+                  ("Miao Library", "https://miaolibrary.in/"),
+              ],
+              "visit/testimonials/founder/index.html": [
+                  ("Home", "../../../index.html"),
+                  ("Visits", "../../index.html"),
+                  ("Testimonials", "../index.html"),
+                  ("Miao Library", "https://miaolibrary.in/"),
+              ],
+          }
+
+          css = """\n    .nalc-footer-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:2rem;align-items:start;text-align:left}\n    .nalc-footer-col{min-width:0}\n    .nalc-footer-title{font-size:1rem;font-weight:800;letter-spacing:.04em;margin:0 0 .75rem;color:#fff}\n    .nalc-footer-address,.nalc-footer-copy{margin:0;line-height:1.65;opacity:.9}\n    .nalc-footer-links{display:flex;flex-direction:column;align-items:flex-start;gap:.5rem}\n    .nalc-footer-links a{color:#fff;font-weight:700}\n    .nalc-footer-links a:hover{text-decoration:underline}\n    .nalc-footer-right{text-align:right}\n    @media(max-width:767px){.nalc-footer-grid{grid-template-columns:1fr;gap:1.75rem}.nalc-footer-right{text-align:left}}\n"""
+
+          for filename, links in pages.items():
+              p = Path(filename)
+              text = p.read_text(encoding="utf-8")
+              if text.count("<footer") != 1 or text.count("</footer>") != 1:
+                  raise SystemExit(f"Footer structure check failed: {filename}")
+              if ".nalc-footer-grid" not in text:
+                  pos = text.rfind("</style>")
+                  if pos < 0:
+                      raise SystemExit(f"Style block not found: {filename}")
+                  text = text[:pos] + css + text[pos:]
+              link_html = "".join(f'<a href="{href}">{label}</a>' for label, href in links)
+              footer = f'''  <footer>\n    <div class="container">\n      <div class="nalc-footer-grid">\n        <div class="nalc-footer-col">\n          <p class="nalc-footer-title">New Age Learning Centre</p>\n          <p class="nalc-footer-address">Miao Sub-Division, Changlang District,<br>Arunachal Pradesh</p>\n        </div>\n        <div class="nalc-footer-col">\n          <p class="nalc-footer-title">Quick Links</p>\n          <nav class="nalc-footer-links" aria-label="Footer quick links">{link_html}</nav>\n        </div>\n        <div class="nalc-footer-col nalc-footer-right">\n          <p class="nalc-footer-copy">© 2026 Sub Divisional Library Miao<br>Changlang District, Arunachal Pradesh</p>\n        </div>\n      </div>\n    </div>\n  </footer>'''
+              text2, n = re.subn(r"  <footer>.*?</footer>", footer, text, count=1, flags=re.S)
+              if n != 1:
+                  raise SystemExit(f"Footer replacement failed: {filename}")
+              p.write_text(text2, encoding="utf-8")
+
+          print("Footer update prepared successfully.")
+      - name: Commit footer changes
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html visit/index.html visit/testimonials/index.html visit/testimonials/founder/index.html
+          git diff --cached --exit-code && { echo "No footer changes detected"; exit 0; }
+          git commit -m "Standardize NALC page footers"
+          git push
