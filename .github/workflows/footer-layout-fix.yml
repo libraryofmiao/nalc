@@ -1,0 +1,36 @@
+name: Fix NALC footer layout
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  fix-footer-css:
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Adjust footer layout only
+        shell: python
+        run: |
+          from pathlib import Path
+          files = [Path('index.html'), Path('visit/index.html'), Path('visit/testimonials/index.html'), Path('visit/testimonials/founder/index.html')]
+          old = '.nalc-footer-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:2rem;align-items:start;text-align:left}'
+          new = '.nalc-footer-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(150px,.8fr) minmax(0,1.2fr);gap:3rem;align-items:start;text-align:left;max-width:1140px;margin:0 auto;padding:0 1.5rem}'
+          for p in files:
+              text = p.read_text(encoding='utf-8')
+              if text.count(old) != 1:
+                  raise SystemExit(f'Expected exactly one footer grid rule in {p}, found {text.count(old)}')
+              p.write_text(text.replace(old, new, 1), encoding='utf-8')
+      - name: Commit only footer CSS changes
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html visit/index.html visit/testimonials/index.html visit/testimonials/founder/index.html
+          git diff --cached --exit-code && { echo "No changes"; exit 0; }
+          git commit -m "Refine NALC footer layout [skip ci]"
+          git push
