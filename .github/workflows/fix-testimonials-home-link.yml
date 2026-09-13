@@ -1,0 +1,35 @@
+name: Fix NALC testimonials home link
+"on":
+  push:
+    branches:
+      - main
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Correct one link path only
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('testimonials/index.html')
+          s=p.read_text(encoding='utf-8')
+          s=s.replace('href="../../index.html">Home', 'href="../index.html">Home')
+          p.write_text(s, encoding='utf-8')
+          PY
+          git diff --check
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add testimonials/index.html
+          git commit -m 'Fix testimonials home link'
+          git push origin main
+          rm .github/workflows/fix-testimonials-home-link.yml
+          git add .github/workflows/fix-testimonials-home-link.yml
+          git commit -m 'Remove temporary testimonials link workflow'
+          git push origin main
