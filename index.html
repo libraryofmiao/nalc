@@ -111,7 +111,17 @@
     .footer-glow-wrap{background:var(--primary)}
     .footer-glow-wrap .footer-link{background:var(--primary)!important;color:#fff!important}
     .footer-glow-wrap .footer-link:hover{background:var(--primary)!important;color:#fff!important}
-  </style>
+  
+    .nalc-footer-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:2rem;align-items:start;text-align:left}
+    .nalc-footer-col{min-width:0}
+    .nalc-footer-title{font-size:1rem;font-weight:800;letter-spacing:.04em;margin:0 0 .75rem;color:#fff}
+    .nalc-footer-address,.nalc-footer-copy{margin:0;line-height:1.65;opacity:.9}
+    .nalc-footer-links{display:flex;flex-direction:column;align-items:flex-start;gap:.5rem}
+    .nalc-footer-links a{color:#fff;font-weight:700}
+    .nalc-footer-links a:hover{text-decoration:underline}
+    .nalc-footer-right{text-align:right}
+    @media(max-width:767px){.nalc-footer-grid{grid-template-columns:1fr;gap:1.75rem}.nalc-footer-right{text-align:left}}
+</style>
 </head>
 <body>
   <header class="menu">
@@ -248,9 +258,22 @@
     </section>
   </main>
 
-  <footer>
-    <div class="container"><div class="footer-links"><a href="https://nalc.miaolibrary.in/">Home</a><div class="footer-glow-wrap"><a class="footer-link" href="https://nalc.miaolibrary.in/visit/index.html">Visits</a></div><div class="footer-glow-wrap"><a class="footer-link" href="https://nalc.miaolibrary.in/visit/testimonials/index.html">Testimonials</a></div><a href="https://nalc.miaolibrary.in/visit/testimonials/founder/index.html">Founder</a></div><p class="footer-meta">New Age Learning Centre (NALC) · Sub Divisional Library Miao, Changlang, Arunachal Pradesh, India</p></div><p style="margin:0;opacity:.72">© NALC Miao</p></div><p style="margin:0;opacity:.72">© 2026 Sub Divisional Library Miao
-Changlang District, Arunachal Pradesh</p></div>
+    <footer>
+    <div class="container">
+      <div class="nalc-footer-grid">
+        <div class="nalc-footer-col">
+          <p class="nalc-footer-title">New Age Learning Centre</p>
+          <p class="nalc-footer-address">Miao Sub-Division, Changlang District,<br>Arunachal Pradesh</p>
+        </div>
+        <div class="nalc-footer-col">
+          <p class="nalc-footer-title">Quick Links</p>
+          <nav class="nalc-footer-links" aria-label="Footer quick links"><a href="visit/index.html">Visits</a><a href="visit/testimonials/index.html">Testimonials</a><a href="visit/testimonials/founder/index.html">Founder</a><a href="https://miaolibrary.in/">Miao Library</a></nav>
+        </div>
+        <div class="nalc-footer-col nalc-footer-right">
+          <p class="nalc-footer-copy">© 2026 Sub Divisional Library Miao<br>Changlang District, Arunachal Pradesh</p>
+        </div>
+      </div>
+    </div>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
